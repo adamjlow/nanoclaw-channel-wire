@@ -293,7 +293,7 @@ export class WireWorker {
       sender: plain(message.sender!),
       senderName: await this.userName(message.sender!),
       isGroup: conversation.kind === 'group',
-      timestamp: message.timestamp.toISOString(),
+      timestamp: isoTimestamp(message.timestamp),
       text: message.text,
       addressed,
       appMentions,
@@ -331,7 +331,7 @@ export class WireWorker {
       sender: plain(message.sender!),
       senderName: await this.userName(message.sender!),
       isGroup: false,
-      timestamp: message.timestamp.toISOString(),
+      timestamp: isoTimestamp(message.timestamp),
       name: message.name ?? null,
       mimeType: message.mimeType,
       size,
@@ -532,6 +532,16 @@ export class WireWorker {
     if (this.watchdog) clearTimeout(this.watchdog);
     this.watchdog = undefined;
   }
+}
+
+/**
+ * SDK 0.1.0 declares `timestamp: Date`, but received messages carry the backend
+ * event's `time` string. Accept both; fall back to now if it's unparseable.
+ */
+export function isoTimestamp(value: unknown): string {
+  const date =
+    value instanceof Date ? value : new Date(typeof value === 'string' || typeof value === 'number' ? value : NaN);
+  return Number.isNaN(date.getTime()) ? new Date().toISOString() : date.toISOString();
 }
 
 function plain(id: QualifiedIdLike): QualifiedIdLike {

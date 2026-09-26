@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type * as WireSdk from '@wireapp/wire-apps-js-sdk';
 
-import { WireWorker, acquireLock, classifyError, setMessageSink } from './wire-worker.js';
+import { WireWorker, acquireLock, classifyError, isoTimestamp, setMessageSink } from './wire-worker.js';
 import type { InitMessage, QualifiedIdLike, WorkerToHost } from './wire-protocol.js';
 
 const APP = { id: '33333333-3333-4333-8333-333333333333', domain: 'wire.example' };
@@ -103,7 +103,8 @@ function textMessage(overrides: Record<string, unknown> = {}) {
     id: 'msg-1',
     conversationId: new QualifiedId(DM.id, DM.domain),
     sender: new QualifiedId(USER.id, USER.domain),
-    timestamp: new Date('2026-09-26T10:00:00Z'),
+    // The real SDK delivers the backend event's ISO string despite its Date type.
+    timestamp: '2026-09-26T10:00:00.000Z',
     text: 'hello',
     ...overrides,
   } as unknown as WireSdk.TextMessage;
@@ -378,6 +379,16 @@ describe('WireWorker calls', () => {
       name: 'Team',
     });
     await worker.stop();
+  });
+});
+
+describe('isoTimestamp', () => {
+  it('accepts the SDK string, a Date or epoch millis, and never throws', () => {
+    expect(isoTimestamp('2026-09-26T10:00:00.000Z')).toBe('2026-09-26T10:00:00.000Z');
+    expect(isoTimestamp(new Date('2026-09-26T10:00:00Z'))).toBe('2026-09-26T10:00:00.000Z');
+    expect(isoTimestamp(Date.UTC(2026, 8, 26, 10))).toBe('2026-09-26T10:00:00.000Z');
+    expect(() => isoTimestamp(undefined)).not.toThrow();
+    expect(() => isoTimestamp('garbage')).not.toThrow();
   });
 });
 
