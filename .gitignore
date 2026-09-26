@@ -1,0 +1,35 @@
+# Node / TypeScript
+node_modules/
+dist/
+build/
+coverage/
+.tsbuildinfo
+
+# Logs
+*.log
+npm-debug.log*
+
+# Env / secrets
+.env
+.env.*
+!.env.example
+
+# Runtime storage (Wire SDK apps.db + CoreCrypto state)
+storage/
+data/
+downloaded_assets/
+
+# Wire app credentials
+wire-app.env
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Temporary files
+tmp/
+temp/
+
+# Disposable NanoClaw dev checkout (scripts/dev-checkout.sh)
+.dev/

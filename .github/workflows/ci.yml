@@ -1,0 +1,50 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    # Debian trixie: Wire's CoreCrypto needs glibc >= 2.38. Node 22 matches NanoClaw.
+    runs-on: ubuntu-latest
+    container: node:22-trixie-slim
+    env:
+      # NanoClaw main commit the channel is verified against (docs/design.md).
+      NANOCLAW_REF: d4ff64f49f1defea8c46a3d884d932a1d967e6d9
+    steps:
+      - run: apt-get update && apt-get install -y --no-install-recommends git ca-certificates
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: NanoClaw checkout
+        run: |
+          git init -q .dev/nanoclaw
+          git -C .dev/nanoclaw fetch -q --depth 1 https://github.com/nanocoai/nanoclaw.git "$NANOCLAW_REF"
+          git -C .dev/nanoclaw checkout -q FETCH_HEAD
+      - name: Install NanoClaw (no lifecycle scripts)
+        working-directory: .dev/nanoclaw
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile --ignore-scripts
+      - name: Apply the channel
+        run: scripts/sync-to-nanoclaw.sh .dev/nanoclaw
+      - name: Typecheck, lint, format
+        working-directory: .dev/nanoclaw
+        run: |
+          pnpm run typecheck
+          pnpm exec eslint src/channels/wire.ts src/channels/wire-worker.ts src/channels/wire-protocol.ts
+          pnpm exec prettier --check "src/channels/wire*.ts"
+      - name: Tests
+        working-directory: .dev/nanoclaw
+        run: pnpm exec vitest run src/channels/wire scripts/skill-conformance.test.ts
+      - name: Skill directive lint
+        working-directory: .dev/nanoclaw
+        run: pnpm exec tsx scripts/skill-directives.ts .claude/skills/add-wire/SKILL.md
+      - name: No host-side SDK import
+        run: |
+          ! grep -nE "from '@wireapp/wire-apps-js-sdk'|import\('@wireapp/wire-apps-js-sdk'\)" src/channels/wire.ts src/channels/wire-protocol.ts

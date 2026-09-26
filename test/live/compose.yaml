@@ -1,0 +1,22 @@
+# One app identity, one worker. Never scale above 1: the Wire SDK state is
+# single-writer.
+name: nanoclaw-channel-wire-live
+
+services:
+  echo:
+    build: .
+    image: nanoclaw-channel-wire-live:local
+    env_file: wire-app.env
+    volumes:
+      # The NanoClaw dev checkout with the Wire channel synced in.
+      - ../../.dev/nanoclaw:/app:ro
+      - ./echo.mts:/live/echo.mts:ro
+      # The app's device identity and rotated token. Deleting it registers a new device.
+      - state:/state
+    command: ["node", "--import", "tsx", "/live/echo.mts"]
+    stop_grace_period: 30s
+    restart: "no"
+
+volumes:
+  state:
+    name: nanoclaw-channel-wire-live-state
