@@ -11,7 +11,7 @@ Use a test team and throwaway conversations: in stage 2, messages go to your mod
 
 ## What you need
 
-- A Wire team where you're an admin (to register test apps), and a second Wire account in the team
+- A team on Wire **staging** (`https://staging-nginz-https.zinfra.io`, domain `staging.zinfra.io`) where you're an admin, and a second staging account in the team
   for the "unknown sender" and group tests
 - Docker. For stage 1 the existing Docker on this machine is enough.
 - For stage 2, a host where Wire's crypto library loads: Linux x86_64 with glibc 2.38 or newer, or a
@@ -28,7 +28,7 @@ the repo root:
 
 ```bash
 node scripts/wire-register-app.mjs create \
-  --host https://prod-nginz-https.wire.com \
+  --host https://staging-nginz-https.zinfra.io \
   --email <your-team-admin-email> --name "NanoClaw echo test" \
   --out test/live/wire-app.env
 ```
