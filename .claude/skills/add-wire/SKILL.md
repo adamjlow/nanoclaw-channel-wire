@@ -148,7 +148,7 @@ ncl wirings create --messaging-group-id <mg-id> --agent-group-id <ag-id>
 ncl members add --user "wire:<uuid>@<domain>" --group <ag-id>
 ```
 
-In groups the channel only forwards messages addressed to the app: an @mention of it, a reply to one of its messages, or a click on its buttons. Everything else is discarded inside the channel, so no NanoClaw wiring setting can make the agent read group chatter; a catch-all engage pattern or the `accumulate` ignored-message policy has no effect. Files posted in groups are never downloaded; send files to the app by DM.
+In groups the channel only forwards messages addressed to the app: an @mention of it, or a click on its buttons. (Replies quoting its messages will count too, once the Wire SDK passes quotes on; version 0.1.0 doesn't.) Everything else is discarded inside the channel, so no NanoClaw wiring setting can make the agent read group chatter; a catch-all engage pattern or the `accumulate` ignored-message policy has no effect. Files posted in groups are never downloaded; send files to the app by DM.
 
 ## Next Steps
 
@@ -169,7 +169,6 @@ If you're in the middle of `/setup`, return to the setup flow now. Otherwise wir
 
 - Text in both directions, with Wire's Markdown subset. Replies longer than 8000 characters are split.
 - @mentions of the app in groups. The mention is shown to the agent as `@<ASSISTANT_NAME>`.
-- Quoted replies: the agent sees the quoted message when it's recent.
 - Files in both directions, with a size cap. Inbound files are accepted in DMs only.
 - Questions and approvals as Wire buttons, with `/option` text replies as a fallback.
 - Message edits and reactions from the agent.

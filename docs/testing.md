@@ -64,7 +64,7 @@ table, noting anything that doesn't match.
 | `!react` | a 👍 on your message |
 | `!buttons` | a "Live test" question with two buttons. Tap one: `you chose: …`, and Wire shows your choice |
 | `!buttons`, then type `/alpha` | `you chose: Alpha` |
-| reply to one of its messages (Wire's reply action) | an echo. Tell me whether quoting worked. |
+| reply to one of its messages (Wire's reply action) | an echo (in a DM everything is addressed). The quote itself isn't passed on by SDK 0.1.0. |
 
 Then groups: create a group with the app and your second account.
 

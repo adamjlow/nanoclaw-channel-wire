@@ -247,7 +247,7 @@ a NanoClaw wiring default an operator can loosen:
 |---|---|
 | Anything in a 1:1 conversation with the app | yes (`addressed: 'dm'`) |
 | Group text that @mentions the app (Wire mention metadata for the app's qualified id, domain included) | yes (`'mention'`) |
-| Group text that quotes a message the app sent (tracked in memory, bounded) | yes (`'reply'`) |
+| Group text that quotes a message the app sent (tracked in memory, bounded) | yes (`'reply'`), **but inert with SDK 0.1.0**, which never sets `quotedMessageId` on received messages; such replies fail closed (discarded) |
 | A click on a button the app sent | yes |
 | Any other group text | **discarded in the worker** |
 | Files posted in a group (Wire files carry no mention or quote) | **discarded, never downloaded** |
@@ -360,6 +360,25 @@ SDK, don't vendor it, and run it in a separate process over IPC. Even so, an ups
 has to raise this with the maintainers, and Wire should confirm the intended licensing for SDK
 consumers. (openclaw-wire *bundles* the SDK tgz, which is a stronger form of distribution.)
 
+### Verified live on staging (2026-09-26)
+
+- First start, including device registration, took about 3.3 s. A restart reuses the device.
+- DMs: text, chunking, files both ways, chained edits, reactions, buttons (tap and `/option`), and
+  opening a 1:1 all work.
+- Groups: @mentions are forwarded. Plain chatter, group files and replies quoting a human produce no
+  channel log line, lookup or download, even at `LOG_LEVEL=debug`. Only the SDK's own debug lines
+  (masked ids, no content) show it decrypted a message.
+
+### Wire SDK 0.1.0 issues to report to the SDK team
+
+1. `message.timestamp` is declared `Date` but is the backend event's ISO string at runtime.
+   (Worked around with `isoTimestamp`.)
+2. Received text messages never carry `quotedMessageId`: `unpackTextMessage` drops `text.quote`,
+   although outbound quotes are serialized.
+3. `CompositeButtonActionConfirmation` isn't exported. (Worked around with a plain object.)
+4. `create()` always installs process-exit handlers, and storage is fixed to cwd-relative
+   `./storage` (open PRs #349 and #348). The worker process makes both harmless here.
+
 ### Still open (need the live test app)
 
 1. `createOneToOneConversation` permissions for apps, and how new 1:1s appear in
@@ -368,7 +387,7 @@ consumers. (openclaw-wire *bundles* the SDK tgz, which is a stronger form of dis
    and `restart.sh`'s 30 s wait.
 3. Whether Wire clients render composite buttons from an app, and whether the confirmation marks the
    selection.
-4. Whether `quotedMessageId` is populated on inbound replies. openclaw-wire saw it unset.
+4. ~~Whether `quotedMessageId` is populated on inbound replies~~ **Answered (live, staging): no.** The 0.1.0 deserializer (`unpackTextMessage`) drops `text.quote`. Replies to the app in groups fail closed, and `replyTo` context never appears.
 5. Whether mention offsets are UTF-16 code units, matching JS string indices.
 8. **Question answers aren't rights-checked by NanoClaw.** Approvals are (`isAuthorizedApprovalClick`),
    but `modules/interactive` records any user's answer to an agent's `ask_user_question`. In a

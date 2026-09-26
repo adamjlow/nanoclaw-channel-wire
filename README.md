@@ -28,7 +28,7 @@ itself, not by a NanoClaw setting an operator could loosen:
 |---|---|
 | a message in a 1:1 conversation with the app | yes |
 | a group message that @mentions the app | yes |
-| a group reply quoting one of the app's own messages | yes |
+| a group reply quoting one of the app's own messages | yes, once the SDK passes quotes on (SDK 0.1.0 doesn't, so today these are discarded: @mention the app instead) |
 | a click on one of the app's own buttons | yes |
 | **any other group message** | **no — discarded** |
 | **a file posted in a group** | **no — discarded, never downloaded** |
@@ -90,7 +90,7 @@ WebSocket to your Wire backend.
 | Data | Where | For how long |
 |---|---|---|
 | Admitted messages | the agent's NanoClaw session store, like any channel | per NanoClaw's session retention |
-| Up to 500 recent addressed messages | channel memory, for quoted-reply context | until restart; never written to disk |
+| Up to 500 recent addressed messages | channel memory, for quoted-reply context (used once the SDK passes quotes on) | until restart; never written to disk |
 | Message ids of the app's own messages, display names | memory, bounded | until restart |
 | Discarded messages | nowhere | — |
 | App identity and current token | `store/wire/` (0700) | until you delete it |
@@ -116,10 +116,10 @@ WebSocket to your Wire backend.
 
 ## Features
 
-- 1:1 and group conversations; groups engage on an @mention or a reply to the app
+- 1:1 and group conversations; groups engage on an @mention of the app
 - Files in both directions, with a size cap (inbound files by DM only)
 - Questions and approvals as Wire buttons, with a `/option` text fallback
-- Message edits and reactions from the agent; quoted-reply context
+- Message edits and reactions from the agent
 - Replies longer than a Wire message are split at paragraph boundaries
 
 The channel doesn't support typing indicators or threads, and doesn't act on inbound edits,
