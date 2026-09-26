@@ -123,7 +123,7 @@ On first start the worker registers the app's device and joins its conversations
 
 ### Your DM
 
-1. In Wire, start a conversation with the app (search for the name you gave it), and send it a message.
+1. In Wire, start a conversation with the app (search for the name you gave it), and send it a message. You must be in the team the app was registered in: apps can't accept connection requests from other teams.
 2. The message is dropped, because unknown senders are refused by default, but NanoClaw records the conversation and the sender:
    ```bash
    ncl messaging-groups list
@@ -172,7 +172,7 @@ If you're in the middle of `/setup`, return to the setup flow now. Otherwise wir
 - Files in both directions, with a size cap. Inbound files are accepted in DMs only.
 - Questions and approvals as Wire buttons, with `/option` text replies as a fallback.
 - Message edits and reactions from the agent.
-- Approvals reach approvers by DM: the adapter opens a 1:1 conversation when needed.
+- Approvals reach approvers by DM: the adapter opens a 1:1 conversation when needed. Wire apps can only open 1:1s with members of **their own team** (apps can't send or accept connection requests), so approvers and owners must be in the app's team.
 
 Not supported: typing indicators, threads, and acting on inbound edits, deletions or reactions.
 
@@ -191,5 +191,7 @@ Not supported: typing indicators, threads, and acting on inbound edits, deletion
 **`Wire worker exited; restarting` repeating.** The backend is unreachable, or the SDK stopped reconnecting. The channel backs off up to 5 minutes between attempts. Check network access to `WIRE_API_HOST`.
 
 **Messages arrive but the agent doesn't answer.** Check `ncl dropped-messages list`. Unknown senders are dropped until you grant them access (`ncl members add`). In groups, the app must be @mentioned or replied to; other group messages are discarded by design.
+
+**`can't open a 1:1 with that user: apps can only DM members of their own team`.** NanoClaw tried to DM someone outside the app's team, typically to deliver an approval. Make sure owners and approvers are members of the team the app was registered in. People from other teams can still use the app in shared groups.
 
 **Logs.** Wire lines in `logs/nanoclaw.log` are prefixed `Wire`. They never contain message text or full ids. For more detail, set `LOG_LEVEL=debug` and restart.

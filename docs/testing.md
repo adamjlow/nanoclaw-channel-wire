@@ -74,7 +74,7 @@ Then groups: create a group with the app and your second account.
 | a file posted in the group | **nothing**; it's not downloaded |
 | `@NanoClaw echo test !ping` (use Wire's @mention picker) | `pong` |
 | reply (Wire's reply action) to one of the app's messages | an echo with `mention=true` |
-| `@NanoClaw echo test !dm` from your second account | the app writes to that account in a new 1:1 conversation |
+| `@NanoClaw echo test !dm` from a second account **in the app's team** | the app writes to that account in a new 1:1 conversation. From another team it can't: apps can't use connection requests. |
 
 ### 1.4 Resilience
 

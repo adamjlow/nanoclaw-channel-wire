@@ -369,6 +369,10 @@ consumers. (openclaw-wire *bundles* the SDK tgz, which is a stronger form of dis
   channel log line, lookup or download, even at `LOG_LEVEL=debug`. Only the SDK's own debug lines
   (masked ids, no content) show it decrypted a message.
 
+- `createOneToOneConversation` works only for users in the app's team. For others the backend
+  returns `not-connected` (apps can't send or accept connection requests), and `openDM` now says so
+  plainly. So NanoClaw owners and approvers must be in the app's team.
+
 ### Wire SDK 0.1.0 issues to report to the SDK team
 
 1. `message.timestamp` is declared `Date` but is the backend event's ISO string at runtime.
@@ -381,8 +385,7 @@ consumers. (openclaw-wire *bundles* the SDK tgz, which is a stronger form of dis
 
 ### Still open (need the live test app)
 
-1. `createOneToOneConversation` permissions for apps, and how new 1:1s appear in
-   `getAllConversations`.
+1. ~~`createOneToOneConversation` permissions for apps~~ **Answered: own team only** (see above).
 2. First-start time (key packages, joining existing MLS groups) against the 20 s `setup()` budget
    and `restart.sh`'s 30 s wait.
 3. Whether Wire clients render composite buttons from an app, and whether the confirmation marks the

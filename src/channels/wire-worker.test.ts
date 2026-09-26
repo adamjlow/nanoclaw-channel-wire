@@ -372,6 +372,18 @@ describe('WireWorker calls', () => {
     await worker.stop();
   });
 
+  it('explains that apps can only open 1:1s with their own team', async () => {
+    const { manager, worker } = await startedWorker();
+    manager.createOneToOneConversation.mockRejectedValueOnce(
+      Object.assign(new Error('Users are not connected'), { name: 'WireApiException' }),
+    );
+    const outsider = { id: '77777777-7777-4777-8777-777777777777', domain: 'other.example' };
+    await expect(worker.call({ type: 'call', id: 1, op: 'openDM', user: outsider })).rejects.toThrow(
+      /only DM members of their own team/,
+    );
+    await worker.stop();
+  });
+
   it('describes conversations from the local store', async () => {
     const { worker } = await startedWorker();
     expect(await worker.call({ type: 'call', id: 1, op: 'conversationInfo', conversation: GROUP })).toEqual({

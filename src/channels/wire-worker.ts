@@ -495,7 +495,19 @@ export class WireWorker {
         return found;
       }
     }
-    const created = plain(await manager.createOneToOneConversation(this.qid(user)));
+    let created: QualifiedIdLike;
+    try {
+      created = plain(await manager.createOneToOneConversation(this.qid(user)));
+    } catch (err) {
+      // Apps can't send or accept connection requests, so they can only open a
+      // 1:1 with members of their own team (verified on staging).
+      if (/not.connected/i.test(String((err as Error)?.message))) {
+        throw new Error("Wire: can't open a 1:1 with that user: apps can only DM members of their own team", {
+          cause: err,
+        });
+      }
+      throw err;
+    }
     this.conversations.set(qualifiedKey(created), { kind: 'direct', name: null });
     this.dmByUser.set(userKey, created);
     return created;

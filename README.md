@@ -83,7 +83,9 @@ WebSocket to your Wire backend.
     or admin, can resolve one.
   - Answers to an agent's own question are passed to the agent with the answering user's id. In a
     group, any member can answer, so agents shouldn't treat a group answer as authorisation.
-- **Approvers:** reached by DM, in a 1:1 conversation the channel opens.
+- **Approvers:** reached by DM, in a 1:1 conversation the channel opens. Wire apps can't send or
+  accept connection requests, so they can only DM members of their own team; owners and approvers
+  must be in the app's team.
 
 ### 5. What is kept, and where
 
