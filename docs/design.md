@@ -362,6 +362,12 @@ consumers. (openclaw-wire *bundles* the SDK tgz, which is a stronger form of dis
 
 ### Verified live on staging (2026-09-26)
 
+- Crash recovery: a SIGKILLed worker is respawned and reconnected in about 6 s, and messages work
+  again straight after.
+- Network cut: see SDK issue 5 below. There's no detection during the outage; recovery takes about
+  1 s once the socket resets, including a sync of missed notifications.
+- `openDM` finds the existing 1:1 with a team member (the path NanoClaw uses to reach an owner).
+
 - First start, including device registration, took about 3.3 s. A restart reuses the device.
 - DMs: text, chunking, files both ways, chained edits, reactions, buttons (tap and `/option`), and
   opening a 1:1 all work.
@@ -382,6 +388,14 @@ consumers. (openclaw-wire *bundles* the SDK tgz, which is a stronger form of dis
 3. `CompositeButtonActionConfirmation` isn't exported. (Worked around with a plain object.)
 4. `create()` always installs process-exit handlers, and storage is fixed to cwd-relative
    `./storage` (open PRs #349 and #348). The worker process makes both harmless here.
+5. **The WebSocket has no liveness check (no ping/pong or heartbeat).** On staging, a 60 s network
+   cut raised no disconnect, and `isConnected()` stayed true. Recovery was instant only because
+   restoring the network reset the dead socket; the SDK then reconnected in about 1 s and synced
+   missed notifications. A silently dropped connection (NAT or firewall idle timeout) could leave
+   the app deaf for hours while reporting connected. The SDK should ping the backend and treat
+   missed pongs as a disconnect. A channel-side mitigation (for example, recycling the worker
+   after a long stretch with no WebSocket activity) is possible but would be a competing reconnect
+   loop, so it's deferred.
 
 ### Still open (need the live test app)
 
