@@ -7,6 +7,9 @@ services:
     build: .
     image: nanoclaw-channel-wire-live:local
     env_file: wire-app.env
+    environment:
+      # LOG_LEVEL=debug test/live/run.sh up — to confirm discarded messages leave no trace.
+      LOG_LEVEL: ${LOG_LEVEL:-info}
     volumes:
       # The NanoClaw dev checkout with the Wire channel synced in.
       - ../../.dev/nanoclaw:/app:ro

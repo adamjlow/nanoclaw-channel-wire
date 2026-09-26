@@ -9,12 +9,26 @@ before the next phase starts.
 |---|---|---|
 | D1 | **Where it ships.** (a) Upstream: code PR'd onto NanoClaw's `channels` branch and the `add-wire` skill onto `main`. (b) Self-hosted: this repo acts as the registry, and the skill copies files from a tagged release here. | Build in this repo with the mirrored layout, which keeps both options open. Ship self-hosted first so we can iterate on an alpha SDK, and open an upstream discussion or issue with NanoClaw maintainers in parallel. Move to (a) once the SDK leaves alpha or they're happy with it. |
 
-> **Status, 2026-09-26.** The adapter, worker, tests and install skill are built and verified
-> offline, including the real worker process and a skill apply/re-apply/remove cycle. The spike
-> (phase 1), the MVP (phase 2) and most of phase 3's code collapsed into one build. What remains
-> before phase 4 is the **live matrix**, which needs a registered test app (see "Next step").
+## Locked plan (2026-09-26)
 
-## Phase 0: foundation (done, except the commit)
+Code, tests, the install skill, CI and the GitHub security setup are done. The remaining work runs
+in this order; each step's detail is in the sections below.
+
+1. **Live testing.** Follow [testing.md](testing.md): the echo bot, then the full NanoClaw host.
+   The results answer design §7 and may change the design.
+2. **Release plumbing.** Publish the `wire-channel` branch (the skill installs from it), tag
+   `v0.1.0`, and add a CHANGELOG.
+3. **Setup and operations (phase 4).** Prompted credentials in the skill with `apply-fixtures.json`;
+   `docs/operations.md`; optional wizard step; macOS arm64 smoke test.
+4. **Known gaps.** Detached handling on removal; the upstream NanoClaw question-answer check; the
+   GPL-3.0 SDK and MIT NanoClaw licensing question.
+5. **Review (phase 5).** The written 12-question security checklist, `/security-review` and
+   `/code-review` over the whole codebase, and zero lint warnings.
+6. **Housekeeping and upstreaming.** Port the register-script fix to openclaw-wire, optionally
+   rename the local folder, and open a NanoClaw maintainer discussion once steps 1 and 4 are
+   settled.
+
+## Phase 0: foundation (done)
 
 - [x] Repo seeded; skills `wire-apps-js-sdk-development` and `nanoclaw-development` in place
 - [x] `AGENTS.md`, design and plan
@@ -22,9 +36,10 @@ before the next phase starts.
 - [x] `scripts/sync-to-nanoclaw.sh <checkout>`: applies the add-wire steps idempotently
 - [x] `test/live/`: a Debian 13 echo-bot harness (the real adapter, worker and SDK, no NanoClaw host
       or agents). CoreCrypto loads there.
-- [ ] Initial commit (the remote is added later by the owner)
+- [x] Published at github.com/adamjlow/nanoclaw-channel-wire (MIT licence; CI, CodeQL, secret
+      scanning with push protection, Dependabot, private vulnerability reporting, rulesets on `main`)
 - [ ] Register a dedicated test Wire app on the openclaw-wire backend and team. Don't reuse
-      openclaw-wire's app: one client per app identity.
+      openclaw-wire's app: one client per app identity. (Step 1 of the locked plan.)
 
 ## Phases 1–3: worker model, MVP and rich messaging
 
@@ -57,7 +72,7 @@ Built and verified offline:
 - [ ] Removal or conversation deletion → detached handling. The event is logged; a seam for marking
       the messaging group detached isn't wired yet.
 
-### Next step: live matrix (`test/live/run.sh up`, then message the app)
+### Live matrix (locked plan step 1; the how-to is in [testing.md](testing.md))
 
 - [ ] `!ping` in a DM, an @mention in a group, and a reply quoting the app's message in a group
 - [ ] Safe discard: plain group chatter and a file posted in a group produce no event and no log line
