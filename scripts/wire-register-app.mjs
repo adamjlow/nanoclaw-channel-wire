@@ -21,7 +21,7 @@
  */
 
 import { randomBytes } from "node:crypto";
-import { writeFileSync, existsSync } from "node:fs";
+import { writeFileSync, rmSync } from "node:fs";
 import { createInterface } from "node:readline/promises";
 import { stdin, stdout, stderr } from "node:process";
 
@@ -181,8 +181,16 @@ function envBlock({ host, token, appId, appDomain, cryptoKey }) {
 function emit(result, opts) {
   const block = envBlock(result);
   if (opts.out) {
-    if (existsSync(opts.out) && !opts.force) fail(`${opts.out} exists; pass --force to overwrite`);
-    writeFileSync(opts.out, block, { mode: 0o600 });
+    // Always create a fresh file: `wx` fails if the path exists (no check-then-write race, no
+    // following a planted symlink), and mode 0600 only applies to a newly created file. So --force
+    // removes the old file first rather than overwriting it with its existing permissions.
+    if (opts.force) rmSync(opts.out, { force: true });
+    try {
+      writeFileSync(opts.out, block, { mode: 0o600, flag: "wx" });
+    } catch (err) {
+      if (err.code === "EEXIST") fail(`${opts.out} exists; pass --force to overwrite`);
+      throw err;
+    }
     stdout.write(`Wrote ${opts.out} (mode 0600).\n`);
   }
   const shown = opts["print-token"]
