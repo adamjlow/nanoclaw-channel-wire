@@ -124,12 +124,12 @@ On first start the worker registers the app's device and joins its conversations
 ### Your DM
 
 1. In Wire, start a conversation with the app (search for the name you gave it), and send it a message. You must be in the team the app was registered in: apps can't accept connection requests from other teams.
-2. The message is dropped, because unknown senders are refused by default, but NanoClaw records the conversation and the sender:
+2. The message is dropped because the conversation isn't wired to an agent yet, but NanoClaw records the conversation and you as a user:
    ```bash
    ncl messaging-groups list
-   ncl dropped-messages list
+   ncl users list
    ```
-   The `wire` messaging group's platform id is the conversation (`<uuid>@<domain>`). The dropped sender is your user id (`wire:<uuid>@<domain>`).
+   The `wire` messaging group's platform id is the conversation (`<uuid>@<domain>`). Your user id is the `wire:<uuid>@<domain>` user with your display name. (`ncl dropped-messages list` shows the drop too, but NanoClaw doesn't record a sender id for conversations that aren't wired yet.)
 3. Wire the DM to a new agent and make yourself its owner:
    ```bash
    pnpm exec tsx scripts/init-first-agent.ts \
@@ -160,7 +160,7 @@ If you're in the middle of `/setup`, return to the setup flow now. Otherwise wir
 - **terminology**: Wire has 1:1 conversations and group conversations. NanoClaw takes part as a Wire *app*, not as a user account.
 - **platform-id-format**: `<conversation-uuid>@<domain>` (lowercase), for both DMs and groups
 - **user-id-format**: `wire:<user-uuid>@<domain>`
-- **how-to-find-id**: Message or @mention the app, then run `ncl messaging-groups list` (conversations) and `ncl dropped-messages list` (senders not yet granted access)
+- **how-to-find-id**: Message or @mention the app, then run `ncl messaging-groups list` (conversations) and `ncl users list` (people). In already-wired conversations, `ncl dropped-messages list` also shows senders not yet granted access.
 - **supports-threads**: no
 - **typical-use**: A team assistant in Wire DMs and small groups
 - **default-isolation**: One Wire app per NanoClaw install. Give groups with other people their own agent group.
@@ -190,7 +190,7 @@ Not supported: typing indicators, threads, and acting on inbound edits, deletion
 
 **`Wire worker exited; restarting` repeating.** The backend is unreachable, or the SDK stopped reconnecting. The channel backs off up to 5 minutes between attempts. Check network access to `WIRE_API_HOST`.
 
-**Messages arrive but the agent doesn't answer.** Check `ncl dropped-messages list`. Unknown senders are dropped until you grant them access (`ncl members add`). In groups, the app must be @mentioned or replied to; other group messages are discarded by design.
+**Messages arrive but the agent doesn't answer.** Check `ncl dropped-messages list`. Unknown senders are dropped until you grant them access (`ncl members add`). In groups, the app must be @mentioned; other group messages are discarded by design.
 
 **`can't open a 1:1 with that user: apps can only DM members of their own team`.** NanoClaw tried to DM someone outside the app's team, typically to deliver an approval. Make sure owners and approvers are members of the team the app was registered in. People from other teams can still use the app in shared groups.
 

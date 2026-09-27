@@ -143,10 +143,10 @@ in the checkout if it isn't on your PATH.)
 | Do | Expect |
 |---|---|
 | DM the app | your agent answers |
-| DM it from your **second** account | no answer. `ncl dropped-messages list` shows the sender, not the message. |
-| grant that account access (`ncl members add …`, see the skill), DM again | it answers |
-| add the app to a group and wire it (see the skill); chat without mentioning it | the agent never sees it: no answer, nothing in `ncl dropped-messages list` |
-| @mention the app in the group | the agent answers |
+| add the app to a group with your second account and wire it (see the skill); chat without mentioning it | the agent never sees it: no answer, nothing in `ncl dropped-messages list` |
+| @mention the app in the group from **your** account | the agent answers |
+| @mention the app from your **second** account (not yet a member) | no answer. `ncl dropped-messages list` shows that sender and a reason, never the message. |
+| grant that account access (`ncl members add …`, see the skill), @mention again | it answers |
 | ask the agent to send you a file, or send it one by DM | the file arrives / the agent can read it |
 | ask the agent a question it has to put to you as choices | Wire buttons, and your tap reaches the agent |
 | restart NanoClaw (`bash setup/lib/restart.sh`) | Wire reconnects; `ncl status` shows `connected: true` |
